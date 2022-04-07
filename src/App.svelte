@@ -9,12 +9,63 @@
   let selectedSquareX;
   let selectedSquareY;
 
+  let score = 0;
+
+  /*
+  // whenever user clicks on a marble, we get all cells in reach to 
+  function getAllCellsInReach(){}
+
+  function shortestPathBinaryMatrix(grid, startPos, endPos) {
+    if (grid[startPos[0]][startPos[1]]) return -1;
+
+    const queue = [{ coord: startPos, dist: 1 }];
+    const directs = [
+      [-1, -1],
+      [-1, 0],
+      [-1, 1],
+      [0, 1],
+      [1, 1],
+      [1, 0],
+      [1, -1],
+      [0, -1],
+    ];
+    const N = grid.length;
+    const isValidCoord = (x, y) => x >= 0 && x < N && y >= 0 && y < N;
+
+    // change to any
+    grid[startPos[0]][startPos[1]] = 1;
+
+    while (queue.length) {
+      const {
+        coord: [x, y],
+        dist,
+      } = queue.shift();
+
+      // change to any destination
+      if (x === endPos[0] && y === endPos[1]) {
+        return dist;
+      }
+
+      for (let [moveX, moveY] of directs) {
+        const nextX = x + moveX;
+        const nextY = y + moveY;
+
+        if (isValidCoord(nextX, nextY) && grid[nextX][nextY] === 0) {
+          queue.push({ coord: [nextX, nextY], dist: dist + 1 });
+          grid[nextX][nextY] = 1;
+        }
+      }
+    }
+
+    return -1;
+  }
+  */
+
   function calculateNextPieces() {
     nextPieces = Array(3)
       .fill(null)
       .map(() => pieces[getRandomInt(pieces.length)]);
   }
-
   function placeNextPieces() {
     let numPlaced = 0;
 
@@ -37,95 +88,177 @@
 
   onMount(() => {
     calculateNextPieces();
-    placeNextPieces();
-    calculateNextPieces();
+    newTurn();
   });
 
-  function clicked(i, j) {
-    // i is row, j is column
-    console.log(i, j);
-    console.log(board[i][j]);
+  function newTurn() {
+    // check if there are five in a row and delete them and increment score if so
+    for (const piece of pieces) {
+      let ret = hasFive(piece);
+      // console.log(board);
+      // console.log(ret);
+      if (ret) {
+        // returned 5 cells with a row of 5
+        // just delete those cells then
+        for (const cell of ret) {
+          board[cell[0]][cell[1]] = null;
+        }
 
+        score += 5 + (ret.length - 5) * 5;
+
+        // if you managed to get 5 in a row, skip putting more marbles down and just
+        // let the user play again
+        return;
+      }
+    }
+
+    // make a new turn
+    placeNextPieces();
+    calculateNextPieces();
+
+    // check if any of the new pieces that got added created more 5 in a rows
+    for (const piece of pieces) {
+      let ret = hasFive(piece);
+      // console.log(ret);
+      if (ret) {
+        // returned 5 cells with a row of 5
+        // just delete those cells then
+        for (const cell of ret) {
+          board[cell[0]][cell[1]] = null;
+        }
+
+        score += 5 + (ret.length - 5) * 5;
+      }
+    }
+  }
+
+  // i is row, j is column
+  function clicked(i, j) {
+    // nothing had been selected before (only happens once in the beginning of each turn)
     if (selectedSquareX == undefined && selectedSquareY == undefined) {
-      // nothing is selected
+      // something is where we clicked
       if (board[i][j]) {
-        // something is there
+        // select that thing instead of what we had selected before
         selectedSquareX = i;
         selectedSquareY = j;
       }
     }
-    if (isBorderingSelectedSquare(i, j)) {
-      // move the current selected dot there
+    // something had been selected before
+    else {
+      // something is where we clicked
+      if (board[i][j]) {
+        // just select that thing instead of what we had selected before
+        selectedSquareX = i;
+        selectedSquareY = j;
+      }
+      // there is nothing where we clicked
+      else {
+        // move the previously selected cell to that cell!
+        board[i][j] = board[selectedSquareX][selectedSquareY];
+        board[selectedSquareX][selectedSquareY] = null;
+        // board = board;
+        selectedSquareX = undefined;
+        selectedSquareY = undefined;
+        newTurn();
+      }
+    }
+  }
 
-      // just swap the two places
-      let temp = board[i][j];
-      board[i][j] = board[selectedSquareX][selectedSquareY];
-      board[selectedSquareX][selectedSquareY] = temp;
-      board = board;
-      console.log(board);
+  // better hasFive would start at a point and move
+  function betterHasFive(color) {
+    var g = board;
 
-      selectedSquareX = undefined;
-      selectedSquareY = undefined;
+    const directions = [
+      [1, 0],
+      [0, 1],
+      [1, 1],
+      [-1, 1],
+    ];
+    const isValidCoord = (x, y) =>
+      x >= 0 && x < boardSize && y >= 0 && y < boardSize;
 
-      // make a new turn
-      placeNextPieces();
-      calculateNextPieces();
-    } else {
-      if (selectedSquareX && selectedSquareY) {
-        console.log(selectedSquareX, selectedSquareY);
-        if (board[i][j] != null) {
-          console.log(board[selectedSquareX][selectedSquareY]);
-          // just select it instead
-          selectedSquareX = i;
-          selectedSquareY = j;
-          console.log(selectedSquareX, selectedSquareY);
-        } else {
-          selectedSquareX = undefined;
-          selectedSquareY = undefined;
+    for (var i = 0; i < boardSize; i++) {
+      for (var j = 0; j < boardSize; j++) {
+        for (const [moveX, moveY] of directions) {
+          // for each cell, for each direction, add the direction to it until it stops
+          // being equal to the color, and then if its 5 or greater, return the cells
+          // else return false
+
+          let nextX = i + moveX;
+          let nextY = j + moveY;
+
+          // if (isValidCoord(nextX, nextY) && board[nextX][nextY] == color){
+          //   queueMicrotask.push({coord: [nextX, nextY], dist: dist+1})
+
+          // }
+          let dist = 0;
+          // maybe better as a while loop because then you can say
+          while (isValidCoord(nextX, nextY) && g[nextX][nextY] == color) {
+            nextX = i + moveX;
+            nextY = j + moveY;
+            dist++;
+          }
+
+          // after the loop, you would have found the longest chain of the same marbles
+          // in the same direction, thus you can use the dist to add points
+          if (dist > 4) {
+            // you might want to have the array of cells in here to return tho...
+            return Array(dist)
+              .fill([i, j])
+              .map((e, i) => e.map((e, i2) => e + i * [moveX, moveY][i2]));
+          }
         }
       }
     }
 
-    // if (board[i][j] == null) {
-    //   selectedSquareX = undefined;
-    //   selectedSquareY = undefined;
-    //   return;
-    // }
-
-    // // if nothing was selected, select this square
-    // if (selectedSquareX == undefined && selectedSquareY == undefined) {
-    //   selectedSquareX = i;
-    //   selectedSquareY = j;
-    // }
-    // else there is something at that square
-
-    if (j + 1 < boardSize) {
-      // ___
-      // _0_
-      // _*_
-    }
-    if (i + 1 < boardSize) {
-    }
-    if (j - 1 >= 0) {
-    }
-    if (i - 1 >= 0) {
-    }
-
-    // if (
-    //   (!(j + 1 in board) || board[i][j + 1] == enemy) &&
-    //   (!(j - 1 in board) || board[i][j - 1] == enemy) &&
-    //   (!(i + 1 in board) || board[i + 1][j] == enemy) &&
-    //   (!(i - 1 in board) || board[i - 1][j] == enemy)
-    // ) {
-    // }
+    return false;
   }
 
-  function isBorderingSelectedSquare(i, j) {
-    return (
-      Math.abs(selectedSquareX - i) < 2 &&
-      Math.abs(selectedSquareY - j) < 2 &&
-      !(i == selectedSquareX && j == selectedSquareY)
-    );
+  function hasFive2(color) {
+    var g = board;
+
+    const isValidCoord = (x, y) =>
+      x >= 0 && x < boardSize && y >= 0 && y < boardSize;
+
+    const directions = [
+      [1, 0],
+      [0, 1],
+      [1, 1],
+      [-1, 1],
+    ];
+
+    for (var i = 0; i < boardSize; i++) {
+      for (var j = 0; j < boardSize; j++) {
+        // check if the current index is the color in the first place
+        if (g[i][j] == color) {
+          // then if so, check for strings in all directions from this point
+
+          for (const direction of directions) {
+            let dist = 0;
+            let nextCell = [i, j];
+
+            // debugger;
+
+            // next cell is the new cell to check
+            while (
+              isValidCoord(nextCell[0], nextCell[1]) &&
+              g[nextCell[0]][nextCell[1]] == color
+            ) {
+              nextCell = [i + direction[0], j + direction[1]];
+              dist++;
+            }
+
+            // we've reached the maximum length of the string
+            // if it's larger than 4 in distance, return the length (for now)
+            // else return 0
+            if (dist > 4) {
+              return dist;
+            }
+          }
+        }
+      }
+    }
+    return false;
   }
 
   function hasFive(color) {
@@ -141,7 +274,59 @@
           g[i][j + 3] == color &&
           g[i][j + 4] == color
         )
-          return true;
+          if (j + 5 in g && g[i][j + 5] == color)
+            if (j + 6 in g && g[i][j + 6] == color)
+              if (j + 7 in g && g[i][j + 7] == color)
+                if (j + 8 in g && g[i][j + 8] == color)
+                  return [
+                    [i, j],
+                    [i, j + 1],
+                    [i, j + 2],
+                    [i, j + 3],
+                    [i, j + 4],
+                    [i, j + 5],
+                    [i, j + 6],
+                    [i, j + 7],
+                    [i, j + 8],
+                  ];
+                else
+                  return [
+                    [i, j],
+                    [i, j + 1],
+                    [i, j + 2],
+                    [i, j + 3],
+                    [i, j + 4],
+                    [i, j + 5],
+                    [i, j + 6],
+                    [i, j + 7],
+                  ];
+              else
+                return [
+                  [i, j],
+                  [i, j + 1],
+                  [i, j + 2],
+                  [i, j + 3],
+                  [i, j + 4],
+                  [i, j + 5],
+                  [i, j + 6],
+                ];
+            else
+              return [
+                [i, j],
+                [i, j + 1],
+                [i, j + 2],
+                [i, j + 3],
+                [i, j + 4],
+                [i, j + 5],
+              ];
+          else
+            return [
+              [i, j],
+              [i, j + 1],
+              [i, j + 2],
+              [i, j + 3],
+              [i, j + 4],
+            ];
         else if (
           i + 4 in g &&
           g[i][j] == color &&
@@ -150,7 +335,59 @@
           g[i + 3][j] == color &&
           g[i + 4][j] == color
         )
-          return true;
+          if (i + 5 in g && g[i + 5][j] == color)
+            if (i + 6 in g && g[i + 6][j] == color)
+              if (i + 7 in g && g[i + 7][j] == color)
+                if (i + 8 in g && g[i + 8][j] == color)
+                  return [
+                    [i, j],
+                    [i + 1, j],
+                    [i + 2, j],
+                    [i + 3, j],
+                    [i + 4, j],
+                    [i + 5, j],
+                    [i + 6, j],
+                    [i + 7, j],
+                    [i + 8, j],
+                  ];
+                else
+                  return [
+                    [i, j],
+                    [i + 1, j],
+                    [i + 2, j],
+                    [i + 3, j],
+                    [i + 4, j],
+                    [i + 5, j],
+                    [i + 6, j],
+                    [i + 7, j],
+                  ];
+              else
+                return [
+                  [i, j],
+                  [i + 1, j],
+                  [i + 2, j],
+                  [i + 3, j],
+                  [i + 4, j],
+                  [i + 5, j],
+                  [i + 6, j],
+                ];
+            else
+              return [
+                [i, j],
+                [i + 1, j],
+                [i + 2, j],
+                [i + 3, j],
+                [i + 4, j],
+                [i + 5, j],
+              ];
+          else
+            return [
+              [i, j],
+              [i + 1, j],
+              [i + 2, j],
+              [i + 3, j],
+              [i + 4, j],
+            ];
         else if (
           i + 4 in g &&
           j + 4 in g &&
@@ -160,7 +397,59 @@
           g[i + 3][j + 3] == color &&
           g[i + 4][j + 4] == color
         )
-          return true;
+          if (i + 5 in g && j + 5 in g && g[i + 5][j + 5] == color)
+            if (i + 6 in g && j + 6 in g && g[i + 6][j + 6] == color)
+              if (i + 7 in g && j + 7 in g && g[i + 7][j + 7] == color)
+                if (i + 8 in g && j + 8 in g && g[i + 8][j + 8] == color)
+                  return [
+                    [i, j],
+                    [i + 1, j + 1],
+                    [i + 2, j + 2],
+                    [i + 3, j + 3],
+                    [i + 4, j + 4],
+                    [i + 5, j + 5],
+                    [i + 6, j + 6],
+                    [i + 7, j + 7],
+                    [i + 8, j + 8],
+                  ];
+                else
+                  return [
+                    [i, j],
+                    [i + 1, j + 1],
+                    [i + 2, j + 2],
+                    [i + 3, j + 3],
+                    [i + 4, j + 4],
+                    [i + 5, j + 5],
+                    [i + 6, j + 6],
+                    [i + 7, j + 7],
+                  ];
+              else
+                return [
+                  [i, j],
+                  [i + 1, j + 1],
+                  [i + 2, j + 2],
+                  [i + 3, j + 3],
+                  [i + 4, j + 4],
+                  [i + 5, j + 5],
+                  [i + 6, j + 6],
+                ];
+            else
+              return [
+                [i, j],
+                [i + 1, j + 1],
+                [i + 2, j + 2],
+                [i + 3, j + 3],
+                [i + 4, j + 4],
+                [i + 5, j + 5],
+              ];
+          else
+            return [
+              [i, j],
+              [i + 1, j + 1],
+              [i + 2, j + 2],
+              [i + 3, j + 3],
+              [i + 4, j + 4],
+            ];
         else if (
           i - 4 in g &&
           j + 4 in g &&
@@ -170,7 +459,59 @@
           g[i - 3][j + 3] == color &&
           g[i - 4][j + 4] == color
         )
-          return true;
+          if (i - 5 in g && j + 5 in g && g[i - 5][j + 5] == color)
+            if (i - 6 in g && j + 6 in g && g[i - 6][j + 6] == color)
+              if (i - 7 in g && j + 7 in g && g[i - 7][j + 7] == color)
+                if (i - 8 in g && j + 8 in g && g[i - 8][j + 8] == color)
+                  return [
+                    [i, j],
+                    [i - 1, j + 1],
+                    [i - 2, j + 2],
+                    [i - 3, j + 3],
+                    [i - 4, j + 4],
+                    [i - 5, j + 5],
+                    [i - 6, j + 6],
+                    [i - 7, j + 7],
+                    [i - 8, j + 8],
+                  ];
+                else
+                  return [
+                    [i, j],
+                    [i - 1, j + 1],
+                    [i - 2, j + 2],
+                    [i - 3, j + 3],
+                    [i - 4, j + 4],
+                    [i - 5, j + 5],
+                    [i - 6, j + 6],
+                    [i - 7, j + 7],
+                  ];
+              else
+                return [
+                  [i, j],
+                  [i - 1, j + 1],
+                  [i - 2, j + 2],
+                  [i - 3, j + 3],
+                  [i - 4, j + 4],
+                  [i - 5, j + 5],
+                  [i - 6, j + 6],
+                ];
+            else
+              return [
+                [i, j],
+                [i - 1, j + 1],
+                [i - 2, j + 2],
+                [i - 3, j + 3],
+                [i - 4, j + 4],
+                [i - 5, j + 5],
+              ];
+          else
+            return [
+              [i, j],
+              [i - 1, j + 1],
+              [i - 2, j + 2],
+              [i - 3, j + 3],
+              [i - 4, j + 4],
+            ];
       }
     }
     return false;
@@ -207,7 +548,7 @@
 </script>
 
 <p>Next pieces: {nextPieces}</p>
-
+<p>Score: {score}</p>
 <table>
   {#each board as row, i}
     <tr>
@@ -215,14 +556,6 @@
         <td
           on:click={() => clicked(i, j)}
           class:selected={selectedSquareX === i && selectedSquareY === j}
-          class:selected-border={Math.abs(selectedSquareX - i) < 2 &&
-            Math.abs(selectedSquareY - j) < 2 &&
-            !(i == selectedSquareX && j == selectedSquareY) &&
-            board[i][j] == null}
-          class:selected-border-occupied={Math.abs(selectedSquareX - i) < 2 &&
-            Math.abs(selectedSquareY - j) < 2 &&
-            !(i == selectedSquareX && j == selectedSquareY) &&
-            board[i][j] != null}
         >
           {square ?? " "}
         </td>
@@ -242,11 +575,5 @@
   }
   .selected {
     background-color: #fff23a;
-  }
-  .selected-border {
-    background-color: #ffa689;
-  }
-  .selected-border-occupied {
-    background-color: #ffac3e;
   }
 </style>
