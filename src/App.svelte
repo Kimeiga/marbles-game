@@ -10,6 +10,7 @@
   let selectedSquareY;
 
   let score = 0;
+  let gameFinished = false;
 
   /*
   // whenever user clicks on a marble, we get all cells in reach to 
@@ -128,6 +129,17 @@
         }
 
         score += 5 + (ret.length - 5) * 5;
+      }
+    }
+
+    gameFinished = true;
+    // check if the entire board is filled with dots
+    // then the game is over and you can display the score
+    for (var i = 0; i < boardSize; i++) {
+      for (var j = 0; j < boardSize; j++) {
+        if (board[i][j] == null) {
+          gameFinished = false;
+        }
       }
     }
   }
@@ -537,41 +549,68 @@
       };
     },
   });
-
-  // function checkWin() {
-  //   for (let i = 0; i < boardSize; i++) {
-  //     for (let j = 0; j < boardSize; j++) {
-  // 			if
-  // 		}
-  //   }
-  // }
 </script>
 
-<p>Next pieces: {nextPieces}</p>
-<p>Score: {score}</p>
-<table>
-  {#each board as row, i}
-    <tr>
+<main>
+  <h1>Marbles</h1>
+  <div id="board">
+    {#each board as row, i}
       {#each row as square, j}
-        <td
+        <div
+          id="cell"
           on:click={() => clicked(i, j)}
           class:selected={selectedSquareX === i && selectedSquareY === j}
         >
-          {square ?? " "}
-        </td>
+          <div class="content">
+            {square ?? " "}
+          </div>
+        </div>
       {/each}
-    </tr>
-  {/each}
-</table>
+    {/each}
+  </div>
+
+  {#if gameFinished}
+    <h2>Game Over. Score: {score}</h2>
+  {:else}
+    <h3>Next pieces: {nextPieces}</h3>
+    <h3>Score: {score}</h3>
+  {/if}
+</main>
 
 <style>
-  table tr td {
-    width: 30px;
-    height: 30px;
+  main {
+    max-width: 1000px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  #board {
+    max-width: 700px;
+    display: grid;
+    margin: 0 auto;
+    grid-template-columns: repeat(9, 1fr);
+    grid-template-rows: repeat(9, 1fr);
     border: 1px solid black;
   }
-  td {
-    text-align: center;
+
+  #cell {
+    border: 1px solid black;
+    position: relative;
+  }
+  #cell:after {
+    content: "";
+    display: block;
+    padding-bottom: 100%;
+  }
+  .content {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: min(7vmin, 50px);
   }
   .selected {
     background-color: #fff23a;
