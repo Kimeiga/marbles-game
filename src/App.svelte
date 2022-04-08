@@ -713,6 +713,6 @@
   }
 
   .reachable {
-    background-color: #ef9b00;
+    background-color: #fffbc1;
   }
 </style>
