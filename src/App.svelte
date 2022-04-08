@@ -9,12 +9,56 @@
   let selectedSquareX;
   let selectedSquareY;
 
+  let reachableCells = {};
+
   let score = 0;
   let gameFinished = false;
 
-  /*
-  // whenever user clicks on a marble, we get all cells in reach to 
-  function getAllCellsInReach(){}
+  // whenever user clicks on a marble, we get all cells in reach to
+  function allReachableCells(startPos) {
+    // copy 2d array
+    let grid = board.map(function (arr) {
+      return arr.slice();
+    });
+
+    const queue = [{ coord: startPos, dist: 1 }];
+    let reachableCells = {};
+    const directs = [
+      [-1, 0],
+      [0, 1],
+      [1, 0],
+      [0, -1],
+    ];
+    const N = grid.length;
+    const isValidCoord = (x, y) => x >= 0 && x < N && y >= 0 && y < N;
+
+    // change to any
+    grid[startPos[0]][startPos[1]] = 1;
+
+    while (queue.length) {
+      const {
+        coord: [x, y],
+        dist,
+      } = queue.shift();
+
+      reachableCells[`${x},${y}`] = true;
+
+      for (let [moveX, moveY] of directs) {
+        const nextX = x + moveX;
+        const nextY = y + moveY;
+
+        if (isValidCoord(nextX, nextY) && grid[nextX][nextY] == null) {
+          queue.push({ coord: [nextX, nextY], dist: dist + 1 });
+          grid[nextX][nextY] = 1;
+        }
+      }
+    }
+
+    // remove the starting cell from this dict
+    delete reachableCells[`${startPos[0]},${startPos[1]}`];
+
+    return reachableCells;
+  }
 
   function shortestPathBinaryMatrix(grid, startPos, endPos) {
     if (grid[startPos[0]][startPos[1]]) return -1;
@@ -60,7 +104,6 @@
 
     return -1;
   }
-  */
 
   function calculateNextPieces() {
     nextPieces = Array(3)
@@ -144,6 +187,26 @@
     }
   }
 
+  function selectedACell(i, j) {
+    // reset reachable cells
+    reachableCells = {};
+
+    selectedSquareX = i;
+    selectedSquareY = j;
+
+    // selecting a cell will also calculate all of the cells that can be reached from that cell
+    reachableCells = allReachableCells([i, j]);
+    console.log(reachableCells);
+    console.log(board);
+  }
+
+  function deselectCell() {
+    selectedSquareX = undefined;
+    selectedSquareY = undefined;
+    // reset reachable cells
+    reachableCells = {};
+  }
+
   // i is row, j is column
   function clicked(i, j) {
     // nothing had been selected before (only happens once in the beginning of each turn)
@@ -151,27 +214,41 @@
       // something is where we clicked
       if (board[i][j]) {
         // select that thing instead of what we had selected before
-        selectedSquareX = i;
-        selectedSquareY = j;
+
+        selectedACell(i, j);
       }
     }
     // something had been selected before
     else {
       // something is where we clicked
       if (board[i][j]) {
-        // just select that thing instead of what we had selected before
-        selectedSquareX = i;
-        selectedSquareY = j;
+        if (i == selectedSquareX && j == selectedSquareY) {
+          // you clicked on your own selected marble again, so just deselect it (toggle)
+          deselectCell();
+        } else {
+          // just select that thing instead of what we had selected before
+          selectedACell(i, j);
+        }
       }
       // there is nothing where we clicked
       else {
-        // move the previously selected cell to that cell!
-        board[i][j] = board[selectedSquareX][selectedSquareY];
-        board[selectedSquareX][selectedSquareY] = null;
-        // board = board;
-        selectedSquareX = undefined;
-        selectedSquareY = undefined;
-        newTurn();
+        // make sure that the cell that we clicked is a reachable cell from the current cell
+        if (`${i},${j}` in reachableCells) {
+          // move the previously selected cell to that cell!
+          board[i][j] = board[selectedSquareX][selectedSquareY];
+          board[selectedSquareX][selectedSquareY] = null;
+          // board = board;
+          selectedSquareX = undefined;
+          selectedSquareY = undefined;
+
+          // reset reachable cells
+          reachableCells = {};
+
+          newTurn();
+        } else {
+          // if you clicked somewhere where you can't move, just deselect
+          deselectCell();
+        }
       }
     }
   }
@@ -560,6 +637,7 @@
           id="cell"
           on:click={() => clicked(i, j)}
           class:selected={selectedSquareX === i && selectedSquareY === j}
+          class:reachable={reachableCells[`${i},${j}`]}
         >
           <div class="content">
             {square ?? " "}
@@ -614,5 +692,9 @@
   }
   .selected {
     background-color: #fff23a;
+  }
+
+  .reachable {
+    background-color: #ef9b00;
   }
 </style>
