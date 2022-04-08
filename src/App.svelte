@@ -31,8 +31,7 @@
       [0, -1],
     ];
     const N = grid.length;
-    const isValidCoord = (x, y) => x >= 0 && x < N && y >= 0 && y < N;
-
+    const isValidCoord = (x, y, N) => x >= 0 && x < N && y >= 0 && y < N;
     // change to any
     grid[startPos[0]][startPos[1]] = 1;
 
@@ -48,7 +47,7 @@
         const nextX = x + moveX;
         const nextY = y + moveY;
 
-        if (isValidCoord(nextX, nextY) && grid[nextX][nextY] == null) {
+        if (isValidCoord(nextX, nextY, N) && grid[nextX][nextY] == null) {
           queue.push({ coord: [nextX, nextY], dist: dist + 1 });
           grid[nextX][nextY] = 1;
         }
@@ -61,50 +60,49 @@
     return reachableCells;
   }
 
-  function shortestPathBinaryMatrix(grid, startPos, endPos) {
-    if (grid[startPos[0]][startPos[1]]) return -1;
+  // function shortestPathBinaryMatrix(grid, startPos, endPos) {
+  //   if (grid[startPos[0]][startPos[1]]) return -1;
 
-    const queue = [{ coord: startPos, dist: 1 }];
-    const directs = [
-      [-1, -1],
-      [-1, 0],
-      [-1, 1],
-      [0, 1],
-      [1, 1],
-      [1, 0],
-      [1, -1],
-      [0, -1],
-    ];
-    const N = grid.length;
-    const isValidCoord = (x, y) => x >= 0 && x < N && y >= 0 && y < N;
+  //   const queue = [{ coord: startPos, dist: 1 }];
+  //   const directs = [
+  //     [-1, -1],
+  //     [-1, 0],
+  //     [-1, 1],
+  //     [0, 1],
+  //     [1, 1],
+  //     [1, 0],
+  //     [1, -1],
+  //     [0, -1],
+  //   ];
+  //   const N = grid.length;
 
-    // change to any
-    grid[startPos[0]][startPos[1]] = 1;
+  //   // change to any
+  //   grid[startPos[0]][startPos[1]] = 1;
 
-    while (queue.length) {
-      const {
-        coord: [x, y],
-        dist,
-      } = queue.shift();
+  //   while (queue.length) {
+  //     const {
+  //       coord: [x, y],
+  //       dist,
+  //     } = queue.shift();
 
-      // change to any destination
-      if (x === endPos[0] && y === endPos[1]) {
-        return dist;
-      }
+  //     // change to any destination
+  //     if (x === endPos[0] && y === endPos[1]) {
+  //       return dist;
+  //     }
 
-      for (let [moveX, moveY] of directs) {
-        const nextX = x + moveX;
-        const nextY = y + moveY;
+  //     for (let [moveX, moveY] of directs) {
+  //       const nextX = x + moveX;
+  //       const nextY = y + moveY;
 
-        if (isValidCoord(nextX, nextY) && grid[nextX][nextY] === 0) {
-          queue.push({ coord: [nextX, nextY], dist: dist + 1 });
-          grid[nextX][nextY] = 1;
-        }
-      }
-    }
+  //       if (isValidCoord(nextX, nextY, N) && grid[nextX][nextY] === 0) {
+  //         queue.push({ coord: [nextX, nextY], dist: dist + 1 });
+  //         grid[nextX][nextY] = 1;
+  //       }
+  //     }
+  //   }
 
-    return -1;
-  }
+  //   return -1;
+  // }
 
   function calculateNextPieces() {
     nextPieces = Array(3)
@@ -154,20 +152,79 @@
     newTurn();
   });
 
+  function calculateCombos(ret) {
+    const isValidCoord = (x, y, N) => x >= 0 && x < N && y >= 0 && y < N;
+
+    if (ret.cells.length == 6) {
+      // if you get 6 in a row, delete the full line that contains the line of cells
+      switch (ret.orientation) {
+        case "NS":
+          for (let i = 0; i < boardSize; i++) {
+            console.log(i, ret.cells[0][1]);
+            board[i][ret.cells[0][1]] = null;
+          }
+          break;
+        case "WE":
+          for (let i = 0; i < boardSize; i++) {
+            board[ret.cells[0][0]][i] = null;
+          }
+          break;
+        case "SW":
+          // use first cell
+          let tx1 = ret.cells[0][0];
+          let ty1 = ret.cells[0][1];
+          for (let i = 0; i < boardSize; i++) {
+            if (isValidCoord(tx1 - i, ty1 + i, boardSize))
+              board[tx1 - i][ty1 + i] = null;
+            if (isValidCoord(tx1 + i, ty1 - i, boardSize))
+              board[tx1 + i][ty1 - i] = null;
+          }
+          break;
+        case "SE":
+          // use first cell
+          let tx2 = ret.cells[0][0];
+          let ty2 = ret.cells[0][1];
+          for (let i = 0; i < boardSize; i++) {
+            if (isValidCoord(tx2 + i, ty2 + i, boardSize))
+              board[tx2 + i][ty2 + i] = null;
+            if (isValidCoord(tx2 - i, ty2 - i, boardSize))
+              board[tx2 - i][ty2 - i] = null;
+          }
+          break;
+      }
+    }
+
+    if (ret.cells.length > 6) {
+      // if you get 7 in row, delete the marbles around it
+      for (const cell of ret.cells) {
+        if (isValidCoord(cell[0] - 1, cell[1], boardSize))
+          board[cell[0] - 1][cell[1]] = null;
+        if (isValidCoord(cell[0] + 1, cell[1], boardSize))
+          board[cell[0] + 1][cell[1]] = null;
+        if (isValidCoord(cell[0], cell[1] - 1, boardSize))
+          board[cell[0]][cell[1] - 1] = null;
+        if (isValidCoord(cell[0], cell[1] + 1, boardSize))
+          board[cell[0]][cell[1] + 1] = null;
+      }
+    }
+  }
+
   function newTurn() {
     // check if there are five in a row and delete them and increment score if so
     for (const piece of pieces) {
       let ret = hasFive(piece);
       // console.log(board);
-      // console.log(ret);
+      console.log(ret);
       if (ret) {
         // returned 5 cells with a row of 5
         // just delete those cells then
-        for (const cell of ret) {
+        for (const cell of ret.cells) {
           board[cell[0]][cell[1]] = null;
         }
 
-        score += 5 + (ret.length - 5) * 5;
+        score += 5 + (ret.cells.length - 5) * 5;
+
+        calculateCombos(ret);
 
         // if you managed to get 5 in a row, skip putting more marbles down and just
         // let the user play again
@@ -186,11 +243,13 @@
       if (ret) {
         // returned 5 cells with a row of 5
         // just delete those cells then
-        for (const cell of ret) {
+        for (const cell of ret.cells) {
           board[cell[0]][cell[1]] = null;
         }
 
-        score += 5 + (ret.length - 5) * 5;
+        score += 5 + (ret.cells.length - 5) * 5;
+
+        calculateCombos(ret);
       }
     }
 
@@ -273,102 +332,103 @@
   }
 
   // better hasFive would start at a point and move
-  function betterHasFive(color) {
-    var g = board;
+  // function betterHasFive(color) {
+  //   var g = board;
 
-    const directions = [
-      [1, 0],
-      [0, 1],
-      [1, 1],
-      [-1, 1],
-    ];
-    const isValidCoord = (x, y) =>
-      x >= 0 && x < boardSize && y >= 0 && y < boardSize;
+  //   const directions = [
+  //     [1, 0],
+  //     [0, 1],
+  //     [1, 1],
+  //     [-1, 1],
+  //   ];
+  //   const isValidCoord = (x, y) =>
+  //     x >= 0 && x < boardSize && y >= 0 && y < boardSize;
 
-    for (var i = 0; i < boardSize; i++) {
-      for (var j = 0; j < boardSize; j++) {
-        for (const [moveX, moveY] of directions) {
-          // for each cell, for each direction, add the direction to it until it stops
-          // being equal to the color, and then if its 5 or greater, return the cells
-          // else return false
+  //   for (var i = 0; i < boardSize; i++) {
+  //     for (var j = 0; j < boardSize; j++) {
+  //       for (const [moveX, moveY] of directions) {
+  //         // for each cell, for each direction, add the direction to it until it stops
+  //         // being equal to the color, and then if its 5 or greater, return the cells
+  //         // else return false
 
-          let nextX = i + moveX;
-          let nextY = j + moveY;
+  //         let nextX = i + moveX;
+  //         let nextY = j + moveY;
 
-          // if (isValidCoord(nextX, nextY) && board[nextX][nextY] == color){
-          //   queueMicrotask.push({coord: [nextX, nextY], dist: dist+1})
+  //         // if (isValidCoord(nextX, nextY) && board[nextX][nextY] == color){
+  //         //   queueMicrotask.push({coord: [nextX, nextY], dist: dist+1})
 
-          // }
-          let dist = 0;
-          // maybe better as a while loop because then you can say
-          while (isValidCoord(nextX, nextY) && g[nextX][nextY] == color) {
-            nextX = i + moveX;
-            nextY = j + moveY;
-            dist++;
-          }
+  //         // }
+  //         let dist = 0;
+  //         // maybe better as a while loop because then you can say
+  //         while (isValidCoord(nextX, nextY) && g[nextX][nextY] == color) {
+  //           nextX = i + moveX;
+  //           nextY = j + moveY;
+  //           dist++;
+  //         }
 
-          // after the loop, you would have found the longest chain of the same marbles
-          // in the same direction, thus you can use the dist to add points
-          if (dist > 4) {
-            // you might want to have the array of cells in here to return tho...
-            return Array(dist)
-              .fill([i, j])
-              .map((e, i) => e.map((e, i2) => e + i * [moveX, moveY][i2]));
-          }
-        }
-      }
-    }
+  //         // after the loop, you would have found the longest chain of the same marbles
+  //         // in the same direction, thus you can use the dist to add points
+  //         if (dist > 4) {
+  //           // you might want to have the array of cells in here to return tho...
+  //           return Array(dist)
+  //             .fill([i, j])
+  //             .map((e, i) => e.map((e, i2) => e + i * [moveX, moveY][i2]));
+  //         }
+  //       }
+  //     }
+  //   }
 
-    return false;
-  }
+  //   return false;
+  // }
 
-  function hasFive2(color) {
-    var g = board;
+  // function hasFive2(color) {
+  //   var g = board;
 
-    const isValidCoord = (x, y) =>
-      x >= 0 && x < boardSize && y >= 0 && y < boardSize;
+  //   const isValidCoord = (x, y) =>
+  //     x >= 0 && x < boardSize && y >= 0 && y < boardSize;
 
-    const directions = [
-      [1, 0],
-      [0, 1],
-      [1, 1],
-      [-1, 1],
-    ];
+  //   const directions = [
+  //     [1, 0],
+  //     [0, 1],
+  //     [1, 1],
+  //     [-1, 1],
+  //   ];
 
-    for (var i = 0; i < boardSize; i++) {
-      for (var j = 0; j < boardSize; j++) {
-        // check if the current index is the color in the first place
-        if (g[i][j] == color) {
-          // then if so, check for strings in all directions from this point
+  //   for (var i = 0; i < boardSize; i++) {
+  //     for (var j = 0; j < boardSize; j++) {
+  //       // check if the current index is the color in the first place
+  //       if (g[i][j] == color) {
+  //         // then if so, check for strings in all directions from this point
 
-          for (const direction of directions) {
-            let dist = 0;
-            let nextCell = [i, j];
+  //         for (const direction of directions) {
+  //           let dist = 0;
+  //           let nextCell = [i, j];
 
-            // debugger;
+  //           // debugger;
 
-            // next cell is the new cell to check
-            while (
-              isValidCoord(nextCell[0], nextCell[1]) &&
-              g[nextCell[0]][nextCell[1]] == color
-            ) {
-              nextCell = [i + direction[0], j + direction[1]];
-              dist++;
-            }
+  //           // next cell is the new cell to check
+  //           while (
+  //             isValidCoord(nextCell[0], nextCell[1]) &&
+  //             g[nextCell[0]][nextCell[1]] == color
+  //           ) {
+  //             nextCell = [i + direction[0], j + direction[1]];
+  //             dist++;
+  //           }
 
-            // we've reached the maximum length of the string
-            // if it's larger than 4 in distance, return the length (for now)
-            // else return 0
-            if (dist > 4) {
-              return dist;
-            }
-          }
-        }
-      }
-    }
-    return false;
-  }
+  //           // we've reached the maximum length of the string
+  //           // if it's larger than 4 in distance, return the length (for now)
+  //           // else return 0
+  //           if (dist > 4) {
+  //             return dist;
+  //           }
+  //         }
+  //       }
+  //     }
+  //   }
+  //   return false;
+  // }
 
+  // tell what orientation it is
   function hasFive(color) {
     var g = board;
 
@@ -386,19 +446,37 @@
             if (j + 6 in g && g[i][j + 6] == color)
               if (j + 7 in g && g[i][j + 7] == color)
                 if (j + 8 in g && g[i][j + 8] == color)
-                  return [
-                    [i, j],
-                    [i, j + 1],
-                    [i, j + 2],
-                    [i, j + 3],
-                    [i, j + 4],
-                    [i, j + 5],
-                    [i, j + 6],
-                    [i, j + 7],
-                    [i, j + 8],
-                  ];
+                  return {
+                    cells: [
+                      [i, j],
+                      [i, j + 1],
+                      [i, j + 2],
+                      [i, j + 3],
+                      [i, j + 4],
+                      [i, j + 5],
+                      [i, j + 6],
+                      [i, j + 7],
+                      [i, j + 8],
+                    ],
+                    orientation: "WE",
+                  };
                 else
-                  return [
+                  return {
+                    cells: [
+                      [i, j],
+                      [i, j + 1],
+                      [i, j + 2],
+                      [i, j + 3],
+                      [i, j + 4],
+                      [i, j + 5],
+                      [i, j + 6],
+                      [i, j + 7],
+                    ],
+                    orientation: "WE",
+                  };
+              else
+                return {
+                  cells: [
                     [i, j],
                     [i, j + 1],
                     [i, j + 2],
@@ -406,35 +484,32 @@
                     [i, j + 4],
                     [i, j + 5],
                     [i, j + 6],
-                    [i, j + 7],
-                  ];
-              else
-                return [
+                  ],
+                  orientation: "WE",
+                };
+            else
+              return {
+                cells: [
                   [i, j],
                   [i, j + 1],
                   [i, j + 2],
                   [i, j + 3],
                   [i, j + 4],
                   [i, j + 5],
-                  [i, j + 6],
-                ];
-            else
-              return [
+                ],
+                orientation: "WE",
+              };
+          else
+            return {
+              cells: [
                 [i, j],
                 [i, j + 1],
                 [i, j + 2],
                 [i, j + 3],
                 [i, j + 4],
-                [i, j + 5],
-              ];
-          else
-            return [
-              [i, j],
-              [i, j + 1],
-              [i, j + 2],
-              [i, j + 3],
-              [i, j + 4],
-            ];
+              ],
+              orientation: "WE",
+            };
         else if (
           i + 4 in g &&
           g[i][j] == color &&
@@ -447,19 +522,37 @@
             if (i + 6 in g && g[i + 6][j] == color)
               if (i + 7 in g && g[i + 7][j] == color)
                 if (i + 8 in g && g[i + 8][j] == color)
-                  return [
-                    [i, j],
-                    [i + 1, j],
-                    [i + 2, j],
-                    [i + 3, j],
-                    [i + 4, j],
-                    [i + 5, j],
-                    [i + 6, j],
-                    [i + 7, j],
-                    [i + 8, j],
-                  ];
+                  return {
+                    cells: [
+                      [i, j],
+                      [i + 1, j],
+                      [i + 2, j],
+                      [i + 3, j],
+                      [i + 4, j],
+                      [i + 5, j],
+                      [i + 6, j],
+                      [i + 7, j],
+                      [i + 8, j],
+                    ],
+                    orientation: "NS",
+                  };
                 else
-                  return [
+                  return {
+                    cells: [
+                      [i, j],
+                      [i + 1, j],
+                      [i + 2, j],
+                      [i + 3, j],
+                      [i + 4, j],
+                      [i + 5, j],
+                      [i + 6, j],
+                      [i + 7, j],
+                    ],
+                    orientation: "NS",
+                  };
+              else
+                return {
+                  cells: [
                     [i, j],
                     [i + 1, j],
                     [i + 2, j],
@@ -467,35 +560,32 @@
                     [i + 4, j],
                     [i + 5, j],
                     [i + 6, j],
-                    [i + 7, j],
-                  ];
-              else
-                return [
+                  ],
+                  orientation: "NS",
+                };
+            else
+              return {
+                cells: [
                   [i, j],
                   [i + 1, j],
                   [i + 2, j],
                   [i + 3, j],
                   [i + 4, j],
                   [i + 5, j],
-                  [i + 6, j],
-                ];
-            else
-              return [
+                ],
+                orientation: "NS",
+              };
+          else
+            return {
+              cells: [
                 [i, j],
                 [i + 1, j],
                 [i + 2, j],
                 [i + 3, j],
                 [i + 4, j],
-                [i + 5, j],
-              ];
-          else
-            return [
-              [i, j],
-              [i + 1, j],
-              [i + 2, j],
-              [i + 3, j],
-              [i + 4, j],
-            ];
+              ],
+              orientation: "NS",
+            };
         else if (
           i + 4 in g &&
           j + 4 in g &&
@@ -509,19 +599,37 @@
             if (i + 6 in g && j + 6 in g && g[i + 6][j + 6] == color)
               if (i + 7 in g && j + 7 in g && g[i + 7][j + 7] == color)
                 if (i + 8 in g && j + 8 in g && g[i + 8][j + 8] == color)
-                  return [
-                    [i, j],
-                    [i + 1, j + 1],
-                    [i + 2, j + 2],
-                    [i + 3, j + 3],
-                    [i + 4, j + 4],
-                    [i + 5, j + 5],
-                    [i + 6, j + 6],
-                    [i + 7, j + 7],
-                    [i + 8, j + 8],
-                  ];
+                  return {
+                    cells: [
+                      [i, j],
+                      [i + 1, j + 1],
+                      [i + 2, j + 2],
+                      [i + 3, j + 3],
+                      [i + 4, j + 4],
+                      [i + 5, j + 5],
+                      [i + 6, j + 6],
+                      [i + 7, j + 7],
+                      [i + 8, j + 8],
+                    ],
+                    orientation: "SE",
+                  };
                 else
-                  return [
+                  return {
+                    cells: [
+                      [i, j],
+                      [i + 1, j + 1],
+                      [i + 2, j + 2],
+                      [i + 3, j + 3],
+                      [i + 4, j + 4],
+                      [i + 5, j + 5],
+                      [i + 6, j + 6],
+                      [i + 7, j + 7],
+                    ],
+                    orientation: "SE",
+                  };
+              else
+                return {
+                  cells: [
                     [i, j],
                     [i + 1, j + 1],
                     [i + 2, j + 2],
@@ -529,97 +637,109 @@
                     [i + 4, j + 4],
                     [i + 5, j + 5],
                     [i + 6, j + 6],
-                    [i + 7, j + 7],
-                  ];
-              else
-                return [
+                  ],
+                  orientation: "SE",
+                };
+            else
+              return {
+                cells: [
                   [i, j],
                   [i + 1, j + 1],
                   [i + 2, j + 2],
                   [i + 3, j + 3],
                   [i + 4, j + 4],
                   [i + 5, j + 5],
-                  [i + 6, j + 6],
-                ];
-            else
-              return [
+                ],
+                orientation: "SE",
+              };
+          else
+            return {
+              cells: [
                 [i, j],
                 [i + 1, j + 1],
                 [i + 2, j + 2],
                 [i + 3, j + 3],
                 [i + 4, j + 4],
-                [i + 5, j + 5],
-              ];
-          else
-            return [
-              [i, j],
-              [i + 1, j + 1],
-              [i + 2, j + 2],
-              [i + 3, j + 3],
-              [i + 4, j + 4],
-            ];
+              ],
+              orientation: "SE",
+            };
         else if (
-          i - 4 in g &&
-          j + 4 in g &&
+          i + 4 in g &&
+          j - 4 in g &&
           g[i][j] == color &&
-          g[i - 1][j + 1] == color &&
-          g[i - 2][j + 2] == color &&
-          g[i - 3][j + 3] == color &&
-          g[i - 4][j + 4] == color
+          g[i + 1][j - 1] == color &&
+          g[i + 2][j - 2] == color &&
+          g[i + 3][j - 3] == color &&
+          g[i + 4][j - 4] == color
         )
-          if (i - 5 in g && j + 5 in g && g[i - 5][j + 5] == color)
-            if (i - 6 in g && j + 6 in g && g[i - 6][j + 6] == color)
-              if (i - 7 in g && j + 7 in g && g[i - 7][j + 7] == color)
-                if (i - 8 in g && j + 8 in g && g[i - 8][j + 8] == color)
-                  return [
-                    [i, j],
-                    [i - 1, j + 1],
-                    [i - 2, j + 2],
-                    [i - 3, j + 3],
-                    [i - 4, j + 4],
-                    [i - 5, j + 5],
-                    [i - 6, j + 6],
-                    [i - 7, j + 7],
-                    [i - 8, j + 8],
-                  ];
+          if (i + 5 in g && j - 5 in g && g[i + 5][j - 5] == color)
+            if (i + 6 in g && j - 6 in g && g[i + 6][j - 6] == color)
+              if (i + 7 in g && j - 7 in g && g[i + 7][j - 7] == color)
+                if (i + 8 in g && j - 8 in g && g[i + 8][j - 8] == color)
+                  return {
+                    cells: [
+                      [i, j],
+                      [i + 1, j - 1],
+                      [i + 2, j - 2],
+                      [i + 3, j - 3],
+                      [i + 4, j - 4],
+                      [i + 5, j - 5],
+                      [i + 6, j - 6],
+                      [i + 7, j - 7],
+                      [i + 8, j - 8],
+                    ],
+                    orientation: "SW",
+                  };
                 else
-                  return [
-                    [i, j],
-                    [i - 1, j + 1],
-                    [i - 2, j + 2],
-                    [i - 3, j + 3],
-                    [i - 4, j + 4],
-                    [i - 5, j + 5],
-                    [i - 6, j + 6],
-                    [i - 7, j + 7],
-                  ];
+                  return {
+                    cells: [
+                      [i, j],
+                      [i + 1, j - 1],
+                      [i + 2, j - 2],
+                      [i + 3, j - 3],
+                      [i + 4, j - 4],
+                      [i + 5, j - 5],
+                      [i + 6, j - 6],
+                      [i + 7, j - 7],
+                    ],
+                    orientation: "SW",
+                  };
               else
-                return [
-                  [i, j],
-                  [i - 1, j + 1],
-                  [i - 2, j + 2],
-                  [i - 3, j + 3],
-                  [i - 4, j + 4],
-                  [i - 5, j + 5],
-                  [i - 6, j + 6],
-                ];
+                return {
+                  cells: [
+                    [i, j],
+                    [i + 1, j - 1],
+                    [i + 2, j - 2],
+                    [i + 3, j - 3],
+                    [i + 4, j - 4],
+                    [i + 5, j - 5],
+                    [i + 6, j - 6],
+                  ],
+                  orientation: "SW",
+                };
             else
-              return [
-                [i, j],
-                [i - 1, j + 1],
-                [i - 2, j + 2],
-                [i - 3, j + 3],
-                [i - 4, j + 4],
-                [i - 5, j + 5],
-              ];
+              return {
+                cells: [
+                  [i, j],
+                  [i + 1, j - 1],
+                  [i + 2, j - 2],
+                  [i + 3, j - 3],
+                  [i + 4, j - 4],
+                  [i + 5, j - 5],
+                ],
+                orientation: "SW",
+              };
           else
-            return [
-              [i, j],
-              [i - 1, j + 1],
-              [i - 2, j + 2],
-              [i - 3, j + 3],
-              [i - 4, j + 4],
-            ];
+            return {
+              cells: [
+                [i, j],
+                [i + 1, j - 1],
+                [i + 2, j - 2],
+                [i + 3, j - 3],
+                [i + 4, j - 4],
+              ],
+              orientation: "SW",
+            };
       }
     }
     return false;
