@@ -114,6 +114,24 @@
     let numPlaced = 0;
 
     while (numPlaced < 3) {
+      // if there is no more room (aka you placed 2 stones and there is one more to place)
+      // aka there are no more nulls
+      // just end the game
+      let boardIsFull = true;
+
+      for (let i = 0; i < boardSize; i++) {
+        for (let j = 0; j < boardSize; j++) {
+          if (board[i][j] == null) {
+            boardIsFull = false;
+          }
+        }
+      }
+
+      if (boardIsFull) {
+        gameFinished = true;
+        return;
+      }
+
       let x = getRandomInt(boardSize);
       let y = getRandomInt(boardSize);
 
