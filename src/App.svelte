@@ -3,7 +3,8 @@
 
   const boardSize = 9;
   let board = [...Array(boardSize)].map(() => Array(boardSize).fill(null));
-  const pieces = ["🔴", "⚫️", "🔵", "🟣", "🟡", "🟤", "🟢", "🟠"];
+  const pieces = ["🔴", "🔵", "🟣", "🟡", "🟢", "🟠"];
+  // const pieces = ["🔴", "⚫️", "🔵", "🟣", "🟡", "🟤", "🟢", "🟠"];
 
   let nextPieces = [];
   let selectedSquareX;
@@ -648,7 +649,11 @@
 
 <main>
   <h1>Marbles</h1>
-  <div id="board">
+  <div
+    id="board"
+    style="grid-template-columns: repeat({boardSize}, 1fr);
+    grid-template-rows: repeat({boardSize}, 1fr);"
+  >
     {#each board as row, i}
       {#each row as square, j}
         <div
@@ -684,8 +689,7 @@
     max-width: 700px;
     display: grid;
     margin: 0 auto;
-    grid-template-columns: repeat(9, 1fr);
-    grid-template-rows: repeat(9, 1fr);
+
     border: 1px solid black;
   }
 
