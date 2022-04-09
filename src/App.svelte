@@ -29,6 +29,11 @@
       [0, 1],
       [1, 0],
       [0, -1],
+      // diagonals
+      [-1, -1],
+      [-1, 1],
+      [1, 1],
+      [1, -1],
     ];
     const N = grid.length;
     const isValidCoord = (x, y, N) => x >= 0 && x < N && y >= 0 && y < N;
