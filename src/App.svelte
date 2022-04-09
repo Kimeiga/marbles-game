@@ -4,7 +4,7 @@
   const boardSize = 9;
   let board = [...Array(boardSize)].map(() => Array(boardSize).fill(null));
   const pieces = ["🔴", "🔵", "🟣", "🟡", "🟢", "🟠"];
-  // const pieces = ["🔴", "⚫️", "🔵", "🟣", "🟡", "🟤", "🟢", "🟠"];
+  //const pieces = ["🔴"];
 
   let nextPieces = [];
   let selectedSquareX;
@@ -429,321 +429,356 @@
   // }
 
   // tell what orientation it is
-  function hasFive(color) {
-    var g = board;
 
-    for (var i = 0; i < boardSize; i++) {
-      for (var j = 0; j < boardSize; j++) {
-        if (
-          j + 4 in g &&
-          g[i][j] == color &&
-          g[i][j + 1] == color &&
-          g[i][j + 2] == color &&
-          g[i][j + 3] == color &&
-          g[i][j + 4] == color
-        )
-          if (j + 5 in g && g[i][j + 5] == color)
-            if (j + 6 in g && g[i][j + 6] == color)
-              if (j + 7 in g && g[i][j + 7] == color)
-                if (j + 8 in g && g[i][j + 8] == color)
-                  return {
-                    cells: [
-                      [i, j],
-                      [i, j + 1],
-                      [i, j + 2],
-                      [i, j + 3],
-                      [i, j + 4],
-                      [i, j + 5],
-                      [i, j + 6],
-                      [i, j + 7],
-                      [i, j + 8],
-                    ],
-                    orientation: "WE",
-                  };
-                else
-                  return {
-                    cells: [
-                      [i, j],
-                      [i, j + 1],
-                      [i, j + 2],
-                      [i, j + 3],
-                      [i, j + 4],
-                      [i, j + 5],
-                      [i, j + 6],
-                      [i, j + 7],
-                    ],
-                    orientation: "WE",
-                  };
-              else
-                return {
-                  cells: [
-                    [i, j],
-                    [i, j + 1],
-                    [i, j + 2],
-                    [i, j + 3],
-                    [i, j + 4],
-                    [i, j + 5],
-                    [i, j + 6],
-                  ],
-                  orientation: "WE",
-                };
-            else
-              return {
-                cells: [
-                  [i, j],
-                  [i, j + 1],
-                  [i, j + 2],
-                  [i, j + 3],
-                  [i, j + 4],
-                  [i, j + 5],
-                ],
-                orientation: "WE",
-              };
-          else
-            return {
-              cells: [
-                [i, j],
-                [i, j + 1],
-                [i, j + 2],
-                [i, j + 3],
-                [i, j + 4],
-              ],
-              orientation: "WE",
-            };
-        else if (
-          i + 4 in g &&
-          g[i][j] == color &&
-          g[i + 1][j] == color &&
-          g[i + 2][j] == color &&
-          g[i + 3][j] == color &&
-          g[i + 4][j] == color
-        )
-          if (i + 5 in g && g[i + 5][j] == color)
-            if (i + 6 in g && g[i + 6][j] == color)
-              if (i + 7 in g && g[i + 7][j] == color)
-                if (i + 8 in g && g[i + 8][j] == color)
-                  return {
-                    cells: [
-                      [i, j],
-                      [i + 1, j],
-                      [i + 2, j],
-                      [i + 3, j],
-                      [i + 4, j],
-                      [i + 5, j],
-                      [i + 6, j],
-                      [i + 7, j],
-                      [i + 8, j],
-                    ],
-                    orientation: "NS",
-                  };
-                else
-                  return {
-                    cells: [
-                      [i, j],
-                      [i + 1, j],
-                      [i + 2, j],
-                      [i + 3, j],
-                      [i + 4, j],
-                      [i + 5, j],
-                      [i + 6, j],
-                      [i + 7, j],
-                    ],
-                    orientation: "NS",
-                  };
-              else
-                return {
-                  cells: [
-                    [i, j],
-                    [i + 1, j],
-                    [i + 2, j],
-                    [i + 3, j],
-                    [i + 4, j],
-                    [i + 5, j],
-                    [i + 6, j],
-                  ],
-                  orientation: "NS",
-                };
-            else
-              return {
-                cells: [
-                  [i, j],
-                  [i + 1, j],
-                  [i + 2, j],
-                  [i + 3, j],
-                  [i + 4, j],
-                  [i + 5, j],
-                ],
-                orientation: "NS",
-              };
-          else
-            return {
-              cells: [
-                [i, j],
-                [i + 1, j],
-                [i + 2, j],
-                [i + 3, j],
-                [i + 4, j],
-              ],
-              orientation: "NS",
-            };
-        else if (
-          i + 4 in g &&
-          j + 4 in g &&
-          g[i][j] == color &&
-          g[i + 1][j + 1] == color &&
-          g[i + 2][j + 2] == color &&
-          g[i + 3][j + 3] == color &&
-          g[i + 4][j + 4] == color
-        )
-          if (i + 5 in g && j + 5 in g && g[i + 5][j + 5] == color)
-            if (i + 6 in g && j + 6 in g && g[i + 6][j + 6] == color)
-              if (i + 7 in g && j + 7 in g && g[i + 7][j + 7] == color)
-                if (i + 8 in g && j + 8 in g && g[i + 8][j + 8] == color)
-                  return {
-                    cells: [
-                      [i, j],
-                      [i + 1, j + 1],
-                      [i + 2, j + 2],
-                      [i + 3, j + 3],
-                      [i + 4, j + 4],
-                      [i + 5, j + 5],
-                      [i + 6, j + 6],
-                      [i + 7, j + 7],
-                      [i + 8, j + 8],
-                    ],
-                    orientation: "SE",
-                  };
-                else
-                  return {
-                    cells: [
-                      [i, j],
-                      [i + 1, j + 1],
-                      [i + 2, j + 2],
-                      [i + 3, j + 3],
-                      [i + 4, j + 4],
-                      [i + 5, j + 5],
-                      [i + 6, j + 6],
-                      [i + 7, j + 7],
-                    ],
-                    orientation: "SE",
-                  };
-              else
-                return {
-                  cells: [
-                    [i, j],
-                    [i + 1, j + 1],
-                    [i + 2, j + 2],
-                    [i + 3, j + 3],
-                    [i + 4, j + 4],
-                    [i + 5, j + 5],
-                    [i + 6, j + 6],
-                  ],
-                  orientation: "SE",
-                };
-            else
-              return {
-                cells: [
-                  [i, j],
-                  [i + 1, j + 1],
-                  [i + 2, j + 2],
-                  [i + 3, j + 3],
-                  [i + 4, j + 4],
-                  [i + 5, j + 5],
-                ],
-                orientation: "SE",
-              };
-          else
-            return {
-              cells: [
-                [i, j],
-                [i + 1, j + 1],
-                [i + 2, j + 2],
-                [i + 3, j + 3],
-                [i + 4, j + 4],
-              ],
-              orientation: "SE",
-            };
-        else if (
-          i + 4 in g &&
-          j - 4 in g &&
-          g[i][j] == color &&
-          g[i + 1][j - 1] == color &&
-          g[i + 2][j - 2] == color &&
-          g[i + 3][j - 3] == color &&
-          g[i + 4][j - 4] == color
-        )
-          if (i + 5 in g && j - 5 in g && g[i + 5][j - 5] == color)
-            if (i + 6 in g && j - 6 in g && g[i + 6][j - 6] == color)
-              if (i + 7 in g && j - 7 in g && g[i + 7][j - 7] == color)
-                if (i + 8 in g && j - 8 in g && g[i + 8][j - 8] == color)
-                  return {
-                    cells: [
-                      [i, j],
-                      [i + 1, j - 1],
-                      [i + 2, j - 2],
-                      [i + 3, j - 3],
-                      [i + 4, j - 4],
-                      [i + 5, j - 5],
-                      [i + 6, j - 6],
-                      [i + 7, j - 7],
-                      [i + 8, j - 8],
-                    ],
-                    orientation: "SW",
-                  };
-                else
-                  return {
-                    cells: [
-                      [i, j],
-                      [i + 1, j - 1],
-                      [i + 2, j - 2],
-                      [i + 3, j - 3],
-                      [i + 4, j - 4],
-                      [i + 5, j - 5],
-                      [i + 6, j - 6],
-                      [i + 7, j - 7],
-                    ],
-                    orientation: "SW",
-                  };
-              else
-                return {
-                  cells: [
-                    [i, j],
-                    [i + 1, j - 1],
-                    [i + 2, j - 2],
-                    [i + 3, j - 3],
-                    [i + 4, j - 4],
-                    [i + 5, j - 5],
-                    [i + 6, j - 6],
-                  ],
-                  orientation: "SW",
-                };
-            else
-              return {
-                cells: [
-                  [i, j],
-                  [i + 1, j - 1],
-                  [i + 2, j - 2],
-                  [i + 3, j - 3],
-                  [i + 4, j - 4],
-                  [i + 5, j - 5],
-                ],
-                orientation: "SW",
-              };
-          else
-            return {
-              cells: [
-                [i, j],
-                [i + 1, j - 1],
-                [i + 2, j - 2],
-                [i + 3, j - 3],
-                [i + 4, j - 4],
-              ],
-              orientation: "SW",
-            };
-      }
+function hasFive(color) {
+  var g = board;
+  let c1 = [...Array(boardSize)].map(() => Array(boardSize).fill([0,0,0,0,0,0,0,0]));
+  let f0 = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+  let as = [ [-1,0], [-1,1], [0,1], [1,1], [1,0], [1,-1], [0,-1], [-1,-1] ];
+  let mc = {"i": 0, "j": 0, "dist": 4, "o": 0};
+
+  for (var i = 0; i < boardSize; i++) {
+    for (var j = 0; j < boardSize; j++) {
+      if (g[i][j] != color) continue;
+      c1[i][j] = [1,1,1,1,1,1,1,1];
+      let ms = [ [i-1, j], [i-1, j+1], [i, j+1], [i+1, j+1], [i+1, j], [i+1, j-1], [i, j-1], [i-1, j-1] ];
+      ms = ms.map((m, k) => {
+        if (m[0] < 0 || m[0] >= boardSize || m[1] < 0 || m[1] >= boardSize) return 0;
+        let t = (k+4)%8
+        if (c1[m[0]][m[1]][t] > 0){ 
+            let d = c1[m[0]][m[1]][t] + 1;
+            c1[i][j][t] = d
+            if (d > mc.dist) {mc.i = i;mc.j = j;mc.dist = d;mc.o = k;}
+        }
+      });
     }
-    return false;
   }
+  if (mc.dist > 4) {
+      let a = as[mc.o];
+      let cells = Array(mc.dist).fill(0).map((e, i) => i).map((e) => [mc.i+a[0]*e, mc.j+a[1]*e]);
+      return {
+          "cells": cells,
+          "orientation": f0[mc.o]
+      };
+    }  
+  return false;
+}
+
+  // function hasFive(color) {
+  //   var g = board;
+
+  //   for (var i = 0; i < boardSize; i++) {
+  //     for (var j = 0; j < boardSize; j++) {
+  //       if (
+  //         j + 4 in g &&
+  //         g[i][j] == color &&
+  //         g[i][j + 1] == color &&
+  //         g[i][j + 2] == color &&
+  //         g[i][j + 3] == color &&
+  //         g[i][j + 4] == color
+  //       )
+  //         if (j + 5 in g && g[i][j + 5] == color)
+  //           if (j + 6 in g && g[i][j + 6] == color)
+  //             if (j + 7 in g && g[i][j + 7] == color)
+  //               if (j + 8 in g && g[i][j + 8] == color)
+  //                 return {
+  //                   cells: [
+  //                     [i, j],
+  //                     [i, j + 1],
+  //                     [i, j + 2],
+  //                     [i, j + 3],
+  //                     [i, j + 4],
+  //                     [i, j + 5],
+  //                     [i, j + 6],
+  //                     [i, j + 7],
+  //                     [i, j + 8],
+  //                   ],
+  //                   orientation: "WE",
+  //                 };
+  //               else
+  //                 return {
+  //                   cells: [
+  //                     [i, j],
+  //                     [i, j + 1],
+  //                     [i, j + 2],
+  //                     [i, j + 3],
+  //                     [i, j + 4],
+  //                     [i, j + 5],
+  //                     [i, j + 6],
+  //                     [i, j + 7],
+  //                   ],
+  //                   orientation: "WE",
+  //                 };
+  //             else
+  //               return {
+  //                 cells: [
+  //                   [i, j],
+  //                   [i, j + 1],
+  //                   [i, j + 2],
+  //                   [i, j + 3],
+  //                   [i, j + 4],
+  //                   [i, j + 5],
+  //                   [i, j + 6],
+  //                 ],
+  //                 orientation: "WE",
+  //               };
+  //           else
+  //             return {
+  //               cells: [
+  //                 [i, j],
+  //                 [i, j + 1],
+  //                 [i, j + 2],
+  //                 [i, j + 3],
+  //                 [i, j + 4],
+  //                 [i, j + 5],
+  //               ],
+  //               orientation: "WE",
+  //             };
+  //         else
+  //           return {
+  //             cells: [
+  //               [i, j],
+  //               [i, j + 1],
+  //               [i, j + 2],
+  //               [i, j + 3],
+  //               [i, j + 4],
+  //             ],
+  //             orientation: "WE",
+  //           };
+  //       else if (
+  //         i + 4 in g &&
+  //         g[i][j] == color &&
+  //         g[i + 1][j] == color &&
+  //         g[i + 2][j] == color &&
+  //         g[i + 3][j] == color &&
+  //         g[i + 4][j] == color
+  //       )
+  //         if (i + 5 in g && g[i + 5][j] == color)
+  //           if (i + 6 in g && g[i + 6][j] == color)
+  //             if (i + 7 in g && g[i + 7][j] == color)
+  //               if (i + 8 in g && g[i + 8][j] == color)
+  //                 return {
+  //                   cells: [
+  //                     [i, j],
+  //                     [i + 1, j],
+  //                     [i + 2, j],
+  //                     [i + 3, j],
+  //                     [i + 4, j],
+  //                     [i + 5, j],
+  //                     [i + 6, j],
+  //                     [i + 7, j],
+  //                     [i + 8, j],
+  //                   ],
+  //                   orientation: "NS",
+  //                 };
+  //               else
+  //                 return {
+  //                   cells: [
+  //                     [i, j],
+  //                     [i + 1, j],
+  //                     [i + 2, j],
+  //                     [i + 3, j],
+  //                     [i + 4, j],
+  //                     [i + 5, j],
+  //                     [i + 6, j],
+  //                     [i + 7, j],
+  //                   ],
+  //                   orientation: "NS",
+  //                 };
+  //             else
+  //               return {
+  //                 cells: [
+  //                   [i, j],
+  //                   [i + 1, j],
+  //                   [i + 2, j],
+  //                   [i + 3, j],
+  //                   [i + 4, j],
+  //                   [i + 5, j],
+  //                   [i + 6, j],
+  //                 ],
+  //                 orientation: "NS",
+  //               };
+  //           else
+  //             return {
+  //               cells: [
+  //                 [i, j],
+  //                 [i + 1, j],
+  //                 [i + 2, j],
+  //                 [i + 3, j],
+  //                 [i + 4, j],
+  //                 [i + 5, j],
+  //               ],
+  //               orientation: "NS",
+  //             };
+  //         else
+  //           return {
+  //             cells: [
+  //               [i, j],
+  //               [i + 1, j],
+  //               [i + 2, j],
+  //               [i + 3, j],
+  //               [i + 4, j],
+  //             ],
+  //             orientation: "NS",
+  //           };
+  //       else if (
+  //         i + 4 in g &&
+  //         j + 4 in g &&
+  //         g[i][j] == color &&
+  //         g[i + 1][j + 1] == color &&
+  //         g[i + 2][j + 2] == color &&
+  //         g[i + 3][j + 3] == color &&
+  //         g[i + 4][j + 4] == color
+  //       )
+  //         if (i + 5 in g && j + 5 in g && g[i + 5][j + 5] == color)
+  //           if (i + 6 in g && j + 6 in g && g[i + 6][j + 6] == color)
+  //             if (i + 7 in g && j + 7 in g && g[i + 7][j + 7] == color)
+  //               if (i + 8 in g && j + 8 in g && g[i + 8][j + 8] == color)
+  //                 return {
+  //                   cells: [
+  //                     [i, j],
+  //                     [i + 1, j + 1],
+  //                     [i + 2, j + 2],
+  //                     [i + 3, j + 3],
+  //                     [i + 4, j + 4],
+  //                     [i + 5, j + 5],
+  //                     [i + 6, j + 6],
+  //                     [i + 7, j + 7],
+  //                     [i + 8, j + 8],
+  //                   ],
+  //                   orientation: "SE",
+  //                 };
+  //               else
+  //                 return {
+  //                   cells: [
+  //                     [i, j],
+  //                     [i + 1, j + 1],
+  //                     [i + 2, j + 2],
+  //                     [i + 3, j + 3],
+  //                     [i + 4, j + 4],
+  //                     [i + 5, j + 5],
+  //                     [i + 6, j + 6],
+  //                     [i + 7, j + 7],
+  //                   ],
+  //                   orientation: "SE",
+  //                 };
+  //             else
+  //               return {
+  //                 cells: [
+  //                   [i, j],
+  //                   [i + 1, j + 1],
+  //                   [i + 2, j + 2],
+  //                   [i + 3, j + 3],
+  //                   [i + 4, j + 4],
+  //                   [i + 5, j + 5],
+  //                   [i + 6, j + 6],
+  //                 ],
+  //                 orientation: "SE",
+  //               };
+  //           else
+  //             return {
+  //               cells: [
+  //                 [i, j],
+  //                 [i + 1, j + 1],
+  //                 [i + 2, j + 2],
+  //                 [i + 3, j + 3],
+  //                 [i + 4, j + 4],
+  //                 [i + 5, j + 5],
+  //               ],
+  //               orientation: "SE",
+  //             };
+  //         else
+  //           return {
+  //             cells: [
+  //               [i, j],
+  //               [i + 1, j + 1],
+  //               [i + 2, j + 2],
+  //               [i + 3, j + 3],
+  //               [i + 4, j + 4],
+  //             ],
+  //             orientation: "SE",
+  //           };
+  //       else if (
+  //         i + 4 in g &&
+  //         j - 4 in g &&
+  //         g[i][j] == color &&
+  //         g[i + 1][j - 1] == color &&
+  //         g[i + 2][j - 2] == color &&
+  //         g[i + 3][j - 3] == color &&
+  //         g[i + 4][j - 4] == color
+  //       )
+  //         if (i + 5 in g && j - 5 in g && g[i + 5][j - 5] == color)
+  //           if (i + 6 in g && j - 6 in g && g[i + 6][j - 6] == color)
+  //             if (i + 7 in g && j - 7 in g && g[i + 7][j - 7] == color)
+  //               if (i + 8 in g && j - 8 in g && g[i + 8][j - 8] == color)
+  //                 return {
+  //                   cells: [
+  //                     [i, j],
+  //                     [i + 1, j - 1],
+  //                     [i + 2, j - 2],
+  //                     [i + 3, j - 3],
+  //                     [i + 4, j - 4],
+  //                     [i + 5, j - 5],
+  //                     [i + 6, j - 6],
+  //                     [i + 7, j - 7],
+  //                     [i + 8, j - 8],
+  //                   ],
+  //                   orientation: "SW",
+  //                 };
+  //               else
+  //                 return {
+  //                   cells: [
+  //                     [i, j],
+  //                     [i + 1, j - 1],
+  //                     [i + 2, j - 2],
+  //                     [i + 3, j - 3],
+  //                     [i + 4, j - 4],
+  //                     [i + 5, j - 5],
+  //                     [i + 6, j - 6],
+  //                     [i + 7, j - 7],
+  //                   ],
+  //                   orientation: "SW",
+  //                 };
+  //             else
+  //               return {
+  //                 cells: [
+  //                   [i, j],
+  //                   [i + 1, j - 1],
+  //                   [i + 2, j - 2],
+  //                   [i + 3, j - 3],
+  //                   [i + 4, j - 4],
+  //                   [i + 5, j - 5],
+  //                   [i + 6, j - 6],
+  //                 ],
+  //                 orientation: "SW",
+  //               };
+  //           else
+  //             return {
+  //               cells: [
+  //                 [i, j],
+  //                 [i + 1, j - 1],
+  //                 [i + 2, j - 2],
+  //                 [i + 3, j - 3],
+  //                 [i + 4, j - 4],
+  //                 [i + 5, j - 5],
+  //               ],
+  //               orientation: "SW",
+  //             };
+  //         else
+  //           return {
+  //             cells: [
+  //               [i, j],
+  //               [i + 1, j - 1],
+  //               [i + 2, j - 2],
+  //               [i + 3, j - 3],
+  //               [i + 4, j - 4],
+  //             ],
+  //             orientation: "SW",
+  //           };
+  //     }
+  //   }
+  //   return false;
+  // }
 
   import { quintOut } from "svelte/easing";
   import { crossfade } from "svelte/transition";
