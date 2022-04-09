@@ -9,7 +9,7 @@
   let nextPieces = [];
   let selectedSquareX;
   let selectedSquareY;
-
+  const numPiecesToPlacePerTurn = 4;
   let reachableCells = {};
 
   let score = 0;
@@ -110,14 +110,14 @@
   // }
 
   function calculateNextPieces() {
-    nextPieces = Array(3)
+    nextPieces = Array(numPiecesToPlacePerTurn)
       .fill(null)
       .map(() => pieces[getRandomInt(pieces.length)]);
   }
   function placeNextPieces() {
     let numPlaced = 0;
 
-    while (numPlaced < 3) {
+    while (numPlaced < numPiecesToPlacePerTurn) {
       // if there is no more room (aka you placed 2 stones and there is one more to place)
       // aka there are no more nulls
       // just end the game
